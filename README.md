@@ -7,6 +7,8 @@ The code outputs a labeled map with corresponding minimal bounding boxes for eac
 * corner
 * clustered corner
  
+ ![Example of labeling](https://github.com/tkucner/GridMapDecompose/blob/master/example.png)
+ 
 ## Installation 
 
 ```bash
