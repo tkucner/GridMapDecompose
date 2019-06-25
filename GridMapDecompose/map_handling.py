@@ -113,14 +113,16 @@ class GridMapHandling:
 
         return self.labeled_map, self.segment_type
 
-    def evaluate_segments(self):
+    def evaluate_segments(self, **kwargs):
+        feature_size = kwargs.get('feature_size', 20)
+
         corner_map = np.zeros(self.labeled_map.shape, dtype = np.int)
         for i in range(1, self.labeled_map.max()):
             local_segment = sgh.Segment()
             cluster = np.where(self.labeled_map == i)
             cluster_size = cluster[0].size
             cluster = np.column_stack((cluster[0], cluster[1]))
-            if cluster_size < 10 and self.segment_type[i - 1] is 's':
+            if cluster_size < feature_size and self.segment_type[i - 1] is 's':
                 self.segment_type[i - 1] = 'f'
             local_segment.add_cells(cluster)
             local_segment.compute_hull()

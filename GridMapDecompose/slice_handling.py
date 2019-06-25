@@ -79,7 +79,7 @@ def find_corners(skeleton):
 def follow_line(skeleton, **kwargs):
     skeleton_local = copy.deepcopy(skeleton)
     window_size = kwargs.get('window_size', 3)
-    corner_treshold = kwargs.get('corner_trehsold',0.1)
+    corner_threshold = kwargs.get('corner_threshold', 0.1)
     rs = list()
     before = np.sum(skeleton_local * 1)
     after = 0
@@ -124,7 +124,7 @@ def follow_line(skeleton, **kwargs):
             current_histogram = hog_gradient(1 * window)
             if old_histogram.size != 0:
                 sim = compare_histogram(old_histogram, current_histogram)
-                if sim > corner_treshold:  # magic number denotes similarity between histograms...
+                if sim > corner_threshold:  # magic number denotes similarity between histograms...
                     corners.append(current)
             old_histogram = current_histogram
             col1 = np.array(current[0] + p[0] - 1)
