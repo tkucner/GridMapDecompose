@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="GridMapDecompose",
-    version = "0.0.4",
+    version="0.0.5",
     author="Tomasz Kucner",
     author_email="tomasz.kucner@oru.se",
     description="Simple pacakge for grid map decomposition",
@@ -24,5 +24,6 @@ setuptools.setup(
     install_requires = ['numpy>=1.16.4',
                         'scipy>=1.2.1',
                         'scikit-image>=0.15.0',
+                        'networkx>=2.3',
                         ],
 )
