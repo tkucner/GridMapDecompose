@@ -18,6 +18,7 @@ class GridMapHandling:
         self.threshold_type = np.array([])
         self.binary_map = np.array([])
         self.processed_map = np.array([])
+        self.labeled_map = np.array([])
 
         self.__distance_map = np.array([])
 
@@ -72,32 +73,109 @@ class GridMapHandling:
         self.graph.split_to_subgraphs()
 
     def evaluate_segments(self):
-        for sg in self.graph.W:
-            coord = []
+
+        for i in range(1, self.labeled_map.max()):
             local_segment = sgh.Segment()
-            for node_id in sg.node:
-                a = self.graph.nodes[node_id]
-                coord.append(a['coordinates'])
-            coord = np.array(coord)
-            local_segment.add_cells(coord)
+            cluster = np.where(self.labeled_map == i)
+            # cluster_size = cluster[0].size
+            cluster = np.column_stack((cluster[0], cluster[1]))
+
+            local_segment.add_cells(cluster)
             local_segment.compute_hull()
             local_segment.compute_mbb()
-            self.segment_type.append('w')
+
             self.segments.append(local_segment)
-        for sg in self.graph.C:
-            coord = []
-            local_segment = sgh.Segment()
-            for node_id in sg.node:
-                a = self.graph.nodes[node_id]
-                coord.append(a['coordinates'])
-            coord = np.array(coord)
-            local_segment.add_cells(coord)
-            local_segment.compute_hull()
-            local_segment.compute_mbb()
-            self.segment_type.append('f')
-            self.segments.append(local_segment)
+
         return self.segments
 
+        # for id in range(1,np.max(self.labeled_map)):
+        #
+        #
+        #
+        # for sg in self.graph.W:
+        #     coord = []
+        #     local_segment = sgh.Segment()
+        #     for node_id in sg.node:
+        #         a = self.graph.nodes[node_id]
+        #         coord.append(a['coordinates'])
+        #     coord = np.array(coord)
+        #     local_segment.add_cells(coord)
+        #     local_segment.compute_hull()
+        #     local_segment.compute_mbb()
+        #     self.segment_type.append('w')
+        #     self.segments.append(local_segment)
+        # for sg in self.graph.C:
+        #     coord = []
+        #     local_segment = sgh.Segment()
+        #     for node_id in sg.node:
+        #         a = self.graph.nodes[node_id]
+        #         coord.append(a['coordinates'])
+        #     coord = np.array(coord)
+        #     local_segment.add_cells(coord)
+        #     local_segment.compute_hull()
+        #     local_segment.compute_mbb()
+        #     self.segment_type.append('f')
+        #     self.segments.append(local_segment)
+        # return self.segments
+
+    def label_map(self):
+        self.labeled_map = np.zeros(self.binary_map.shape, dtype=np.int)
+        local_binary_map = self.binary_map.copy()
+        labels = list([])
+        it = 0
+        seeds = list([])
+
+        for sg in self.graph.W:
+            self.segment_type.append('w')
+            it = it +1
+            for node_id in sg.node:
+                a = self.graph.nodes[node_id]
+
+                ac = a['coordinates']
+                self.labeled_map[ac[0], ac[1]] = it
+                local_binary_map[ac[0], ac[1]] = 0
+                seeds.append(a['coordinates'])
+                labels.append(it)
+        for sg in self.graph.C:
+            self.segment_type.append('f')
+            it = it + 1
+            for node_id in sg.node:
+                a = self.graph.nodes[node_id]
+                ac = a['coordinates']
+                self.labeled_map[ac[0], ac[1]] = it
+                local_binary_map[ac[0], ac[1]] = 0
+                seeds.append(a['coordinates'])
+                labels.append(it)
+        pixels = np.array(np.where(local_binary_map == 1))
+        pixels = np.transpose(pixels.reshape([2, -1]))
+        seeds = np.array(seeds)
+        dist = cdist(seeds, pixels)
+        ps = pixels.shape
+        for i in range(0, ps[0]):
+            local_distances = dist[:, i]
+            local_index = np.argmin(local_distances)
+            self.labeled_map[pixels[i, 0], pixels[i, 1]] = labels[local_index]
+
+        # for segment in segments:
+        #     lf = np.array(segment)
+        #     it += 1
+        #     labels_matrix[lf[:, 0], lf[:, 1]] = it
+        #     local_slice[lf[:, 0], lf[:, 1]] = 0
+        #     seeds.extend(lf)
+        #     elem = len(lf)
+        #     labels.extend(np.ones((elem, 1)) * it)
+        # pixels = np.array(np.where(local_slice == 1))
+        # pixels = np.transpose(pixels.reshape([2, -1]))
+        # seeds = np.array(seeds)
+        # dist = cdist(seeds, pixels)
+        #
+        # ps = pixels.shape
+        #
+        # for i in range(0, ps[0]):
+        #     local_distances = dist[:, i]
+        #     local_index = np.argmin(local_distances)
+        #     labels_matrix[pixels[i, 0], pixels[i, 1]] = labels[local_index]
+        # return labels_matrix
 
 
     @staticmethod

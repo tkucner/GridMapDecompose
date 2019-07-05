@@ -20,9 +20,10 @@ if __name__ == "__main__":
     test_map.fill_gaps(1)
 
     test_map.build_graphs()
+    test_map.label_map()
     test_map.evaluate_segments()
 
-    visualize = [False, False, False, True, True]
+    visualize = [False, False, False, True, True, True]
 
     if visualize[0]:
         ################################
@@ -109,6 +110,7 @@ if __name__ == "__main__":
         ax3.axis('off')
 
     if visualize[4]:
+        #############################
         fig4, ax4 = plt.subplots(nrows=1, ncols=1, sharex=True, sharey=True)
         ax4.imshow(test_map.binary_map, cmap="nipy_spectral")
         for local_segment, local_segment_type in zip(test_map.segments, test_map.segment_type):
@@ -118,5 +120,12 @@ if __name__ == "__main__":
                 ax4.plot(local_segment.minimal_bounding_box[:, 1], local_segment.minimal_bounding_box[:, 0], 'r')
 
     ax4.axis('off')
+
+    if visualize[5]:
+        #############################
+        fig5, ax5 = plt.subplots(nrows=1, ncols=1, sharex=True, sharey=True)
+        ax5.imshow(test_map.labeled_map, cmap="nipy_spectral")
+
+    ax5.axis('off')
 
     plt.show()
