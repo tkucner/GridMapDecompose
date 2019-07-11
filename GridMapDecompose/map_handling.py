@@ -16,6 +16,7 @@ class GridMapHandling:
         self.map_file_name = []
 
         self.grid_map = np.array([])
+        self.occupancy_map = np.array([])
         self.threshold_type = np.array([])
         self.binary_map = np.array([])
         self.processed_map = np.array([])
@@ -37,6 +38,9 @@ class GridMapHandling:
     def load_map_flat(self, file_name):
         self.map_file_name = file_name
         self.grid_map = img_as_ubyte(io.imread(self.map_file_name))
+        self.occupancy_map = (np.full(self.grid_map.shape, np.max(self.grid_map)) - self.grid_map) / np.max(
+            self.grid_map)
+
         if len(self.grid_map.shape) == 3:
             self.grid_map = self.grid_map[:, :, 1]
             return self.grid_map
@@ -88,6 +92,7 @@ class GridMapHandling:
             local_segment.add_cells(cluster)
             local_segment.compute_hull()
             local_segment.compute_mbb()
+            local_segment.id = i
 
             self.segments.append(local_segment)
 
