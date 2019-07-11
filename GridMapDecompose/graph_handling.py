@@ -43,6 +43,9 @@ def hog_gradient(image):
 
 class Graph:
     def __init__(self):
+        # ---------------- #
+        # Graph for pixels #
+        # ---------------- #
         self.window_size = 2
         self.map = []
         self.similarity_treshold = 0.09

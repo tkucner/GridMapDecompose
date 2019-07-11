@@ -10,6 +10,7 @@ from skimage.util import img_as_ubyte
 
 from GridMapDecompose import segment_handling as sgh, graph_handling as gh
 
+
 class GridMapHandling:
     def __init__(self):
         self.map_file_name = []
@@ -28,6 +29,10 @@ class GridMapHandling:
         self.segment_type = list([])
         self.segments = list([])
 
+        # ------------------ #
+        # Graph for elements #
+        # ------------------ #
+        self.adjacency_matrix_segments = []
 
     def load_map_flat(self, file_name):
         self.map_file_name = file_name
@@ -88,35 +93,6 @@ class GridMapHandling:
 
         return self.segments
 
-        # for id in range(1,np.max(self.labeled_map)):
-        #
-        #
-        #
-        # for sg in self.graph.W:
-        #     coord = []
-        #     local_segment = sgh.Segment()
-        #     for node_id in sg.node:
-        #         a = self.graph.nodes[node_id]
-        #         coord.append(a['coordinates'])
-        #     coord = np.array(coord)
-        #     local_segment.add_cells(coord)
-        #     local_segment.compute_hull()
-        #     local_segment.compute_mbb()
-        #     self.segment_type.append('w')
-        #     self.segments.append(local_segment)
-        # for sg in self.graph.C:
-        #     coord = []
-        #     local_segment = sgh.Segment()
-        #     for node_id in sg.node:
-        #         a = self.graph.nodes[node_id]
-        #         coord.append(a['coordinates'])
-        #     coord = np.array(coord)
-        #     local_segment.add_cells(coord)
-        #     local_segment.compute_hull()
-        #     local_segment.compute_mbb()
-        #     self.segment_type.append('f')
-        #     self.segments.append(local_segment)
-        # return self.segments
 
     def label_map(self):
         self.labeled_map = np.zeros(self.binary_map.shape, dtype=np.int)
@@ -155,27 +131,18 @@ class GridMapHandling:
             local_distances = dist[:, i]
             local_index = np.argmin(local_distances)
             self.labeled_map[pixels[i, 0], pixels[i, 1]] = labels[local_index]
+        self.adjacency_matrix_segments = np.zeros((max(labels), max(labels)))
+        local_walls_coord = np.array(np.where(self.labeled_map > 0)).transpose()
 
-        # for segment in segments:
-        #     lf = np.array(segment)
-        #     it += 1
-        #     labels_matrix[lf[:, 0], lf[:, 1]] = it
-        #     local_slice[lf[:, 0], lf[:, 1]] = 0
-        #     seeds.extend(lf)
-        #     elem = len(lf)
-        #     labels.extend(np.ones((elem, 1)) * it)
-        # pixels = np.array(np.where(local_slice == 1))
-        # pixels = np.transpose(pixels.reshape([2, -1]))
-        # seeds = np.array(seeds)
-        # dist = cdist(seeds, pixels)
-        #
-        # ps = pixels.shape
-        #
-        # for i in range(0, ps[0]):
-        #     local_distances = dist[:, i]
-        #     local_index = np.argmin(local_distances)
-        #     labels_matrix[pixels[i, 0], pixels[i, 1]] = labels[local_index]
-        # return labels_matrix
+        for coord in local_walls_coord:
+            neighbours = np.array(self.check_neighbour(coord, self.labeled_map))
+            if not neighbours.size == 0:
+                for neighbour in neighbours:
+                    print(neighbour - 1)
+                    self.adjacency_matrix_segments[self.labeled_map[coord[0], coord[1]], neighbour] = 1
+                    self.adjacency_matrix_segments[neighbour, self.labeled_map[coord[0], coord[1]]] = 1
+
+
 
 
     @staticmethod
@@ -185,3 +152,10 @@ class GridMapHandling:
         skeleton = skeletonize(map_slice)
         return skeleton
 
+    @staticmethod
+    def check_neighbour(coord, labeled_map):
+        my_label = labeled_map[coord[0], coord[1]]
+        foot = labeled_map[coord[0] - 1:coord[0] + 2, coord[1] - 1:coord[1] + 2]
+        foot = foot.ravel()
+        foot = np.unique(np.delete(foot, np.where((foot == my_label) | (foot == 0))))
+        return foot

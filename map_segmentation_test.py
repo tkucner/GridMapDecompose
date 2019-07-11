@@ -23,7 +23,7 @@ if __name__ == "__main__":
     test_map.label_map()
     test_map.evaluate_segments()
 
-    visualize = [False, False, False, True, True, True]
+    visualize = [False, False, False, True, True, True, True]
 
     if visualize[0]:
         ################################
@@ -127,5 +127,25 @@ if __name__ == "__main__":
         ax5.imshow(test_map.labeled_map, cmap="nipy_spectral")
 
     ax5.axis('off')
+
+    if visualize[6]:
+        #############################
+        fig6, ax6 = plt.subplots(nrows=1, ncols=1, sharex=True, sharey=True)
+        ax6.imshow(test_map.binary_map, cmap="nipy_spectral")
+        for local_segment, local_segment_type in zip(test_map.segments, test_map.segment_type):
+            if local_segment_type is 'w':
+                ax6.plot(local_segment.minimal_bounding_box[:, 1], local_segment.minimal_bounding_box[:, 0], 'g')
+            if local_segment_type is 'f':
+                ax6.plot(local_segment.minimal_bounding_box[:, 1], local_segment.minimal_bounding_box[:, 0], 'r')
+
+        # quickly find edges
+        LU_adjacency_matrix = np.triu(test_map.adjacency_matrix_segments)
+        edges = np.column_stack(np.nonzero(LU_adjacency_matrix))
+        for edge in edges:
+            x = (test_map.segments[edge[0] - 1].center[1], test_map.segments[edge[1] - 1].center[1])
+            y = (test_map.segments[edge[0] - 1].center[0], test_map.segments[edge[1] - 1].center[0])
+            ax6.plot(x, y, 'b')
+
+    ax6.axis('off')
 
     plt.show()
