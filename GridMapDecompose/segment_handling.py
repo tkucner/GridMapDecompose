@@ -21,11 +21,11 @@ class Segment:
         self.mbb_area = []
 
     @staticmethod
-    def PolyArea(x, y):
+    def polygon_area(x, y):
         return 0.5 * np.abs(np.dot(x, np.roll(y, 1)) - np.dot(y, np.roll(x, 1)))
 
     @staticmethod
-    def algo(x):
+    def sorting_criterion(x):
         return (math.atan2(x[0], x[1]) + 2 * math.pi) % (2 * math.pi)
 
     @staticmethod
@@ -85,8 +85,8 @@ class Segment:
     @staticmethod
     def sorted_rect(vec):
         # returns vec in clockwise order, starting with topleft
-        normd = vec - np.average(vec, axis = 0)  # vertices relative to centroid
-        k = np.apply_along_axis(Segment.algo, axis = 1, arr = normd)
+        normd = vec - np.average(vec, axis=0)  # vertices relative to centroid
+        k = np.apply_along_axis(Segment.sorting_criterion, axis=1, arr=normd)
         order = np.argsort(k)
         return vec[order]
 
@@ -114,7 +114,7 @@ class Segment:
         local_poly = np.column_stack((local_poly[:, 0], local_poly[:, 1]))
         local_poly_sort = Segment.sorted_rect(local_poly)
 
-        local_poly_sort = np.append(local_poly_sort, [local_poly_sort[0, :]], axis = 0)
+        local_poly_sort = np.append(local_poly_sort, [local_poly_sort[0, :]], axis=0)
         return local_poly_sort
 
     def add_cells(self, cells):
@@ -152,7 +152,7 @@ class Segment:
 
         self.center = min_rectangle['rectangle_center']
 
-        self.mbb_area = Segment.PolyArea(self.minimal_bounding_box[:, 0], self.minimal_bounding_box[:, 1])
+        self.mbb_area = Segment.polygon_area(self.minimal_bounding_box[:, 0], self.minimal_bounding_box[:, 1])
 
         if min_rectangle['length_parallel'] < min_rectangle['length_orthogonal']:
             self.rectangle_direction = min_rectangle[

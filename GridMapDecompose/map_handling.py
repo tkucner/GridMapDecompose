@@ -93,7 +93,6 @@ class GridMapHandling:
 
         return self.segments
 
-
     def label_map(self):
         self.labeled_map = np.zeros(self.binary_map.shape, dtype=np.int)
         local_binary_map = self.binary_map.copy()
@@ -140,9 +139,6 @@ class GridMapHandling:
                 for neighbour in neighbours:
                     self.adjacency_matrix_segments[self.labeled_map[coord[0], coord[1]], neighbour] = 1
                     self.adjacency_matrix_segments[neighbour, self.labeled_map[coord[0], coord[1]]] = 1
-
-
-
 
     @staticmethod
     def skeletonize(map_slice):

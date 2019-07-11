@@ -10,8 +10,8 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('img_file', help = 'Path to the map')
-    parser.add_argument('threshold_type', help = 'Threshold type')
+    parser.add_argument('img_file', help='Path to the map')
+    parser.add_argument('threshold_type', help='Threshold type')
     args = parser.parse_args()
 
     test_map = mh.GridMapHandling()
