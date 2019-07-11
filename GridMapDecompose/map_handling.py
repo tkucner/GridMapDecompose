@@ -138,7 +138,6 @@ class GridMapHandling:
             neighbours = np.array(self.check_neighbour(coord, self.labeled_map))
             if not neighbours.size == 0:
                 for neighbour in neighbours:
-                    print(neighbour - 1)
                     self.adjacency_matrix_segments[self.labeled_map[coord[0], coord[1]], neighbour] = 1
                     self.adjacency_matrix_segments[neighbour, self.labeled_map[coord[0], coord[1]]] = 1
 
