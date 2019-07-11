@@ -79,7 +79,7 @@ class GridMapHandling:
 
     def evaluate_segments(self):
 
-        for i in range(1, self.labeled_map.max()):
+        for i in range(1, self.labeled_map.max() + 1):
             local_segment = sgh.Segment()
             cluster = np.where(self.labeled_map == i)
             # cluster_size = cluster[0].size
@@ -130,7 +130,7 @@ class GridMapHandling:
             local_distances = dist[:, i]
             local_index = np.argmin(local_distances)
             self.labeled_map[pixels[i, 0], pixels[i, 1]] = labels[local_index]
-        self.adjacency_matrix_segments = np.zeros((max(labels), max(labels)))
+        self.adjacency_matrix_segments = np.zeros((max(labels) + 1, max(labels) + 1))
         local_walls_coord = np.array(np.where(self.labeled_map > 0)).transpose()
 
         for coord in local_walls_coord:

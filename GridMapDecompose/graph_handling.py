@@ -118,7 +118,6 @@ class Graph:
                 self.adjacency_matrix[a_cell, node['id']] = score
 
     def label_nodes(self):
-
         for row in self.adjacency_matrix:
             self.node_labels.append(np.any(row > self.similarity_threshold))
 
