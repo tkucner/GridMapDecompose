@@ -10,6 +10,19 @@ from skimage.util import img_as_ubyte
 
 from GridMapDecompose import segment_handling as sgh, graph_handling as gh
 
+import pickle
+
+
+def save(graph_map, name):
+    pickle_out = open(name + ".pickle", "wb")
+    pickle.dump(graph_map, pickle_out)
+    pickle_out.close()
+
+
+def load(name):
+    return pickle.load(open(name + ".pickle", "rb"))
+
+
 
 class GridMapHandling:
     def __init__(self):
@@ -43,6 +56,7 @@ class GridMapHandling:
 
         if len(self.grid_map.shape) == 3:
             self.grid_map = self.grid_map[:, :, 1]
+            self.occupancy_map = self.occupancy_map[:, :, 1]
             return self.grid_map
         elif len(self.grid_map.shape) == 2:
             return self.grid_map

@@ -22,6 +22,7 @@ if __name__ == "__main__":
     test_map.build_graphs()
     test_map.label_map()
     test_map.evaluate_segments()
+    test_map.save()
 
     visualize = [False, False, False, True, True, True, True]
 

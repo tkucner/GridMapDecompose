@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="GridMapDecompose",
-    version="0.1.3",
+    version="0.1.4",
     author="Tomasz Kucner",
     author_email="tomasz.kucner@oru.se",
     description="Simple pacakge for grid map decomposition",
