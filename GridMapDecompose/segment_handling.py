@@ -162,5 +162,4 @@ class Segment:
             self.rectangle_direction = min_rectangle['unit_vector']
             self.rectangle_orthogonal = min_rectangle[
                 'orthogonal_vector']  # np.array([min_rectangle['unit_vector'][1], -min_rectangle['unit_vector'][0]])
-        self.angle = math.atan2(self.rectangle_direction[0], self.rectangle_direction[1])
-
+        self.angle = math.arctan2(self.rectangle_direction[1], self.rectangle_direction[0])
