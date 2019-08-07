@@ -15,7 +15,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     test_map = mh.GridMapHandling()
-    test_map.load_map_flat(args.img_file)
+    test_map.load_map_flat_file(args.img_file)
     test_map.threshold_map(args.threshold_type)
     test_map.fill_gaps(1)
 

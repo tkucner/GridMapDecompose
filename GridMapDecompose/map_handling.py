@@ -48,9 +48,22 @@ class GridMapHandling:
         # ------------------ #
         self.adjacency_matrix_segments = []
 
-    def load_map_flat(self, file_name):
+    def load_map_flat_file(self, file_name):
         self.map_file_name = file_name
         self.grid_map = img_as_ubyte(io.imread(self.map_file_name))
+        self.occupancy_map = (np.full(self.grid_map.shape, np.max(self.grid_map)) - self.grid_map) / np.max(
+            self.grid_map)
+
+        if len(self.grid_map.shape) == 3:
+            self.grid_map = self.grid_map[:, :, 1]
+            self.occupancy_map = self.occupancy_map[:, :, 1]
+            return self.grid_map
+        elif len(self.grid_map.shape) == 2:
+            return self.grid_map
+        return []
+
+    def load_map_flat_grid(self, arr):
+        self.grid_map = arr
         self.occupancy_map = (np.full(self.grid_map.shape, np.max(self.grid_map)) - self.grid_map) / np.max(
             self.grid_map)
 
