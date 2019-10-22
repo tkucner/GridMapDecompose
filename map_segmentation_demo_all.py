@@ -10,20 +10,21 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('img_file', help = 'Path to the map')
-    parser.add_argument('threshold_type', help = 'Threshold type')
+    parser.add_argument('img_file', help='Path to the map')
+    parser.add_argument('threshold_type', help='Threshold type')
     args = parser.parse_args()
 
     test_map = mh.GridMapHandling()
-    test_map.load_map_flat(args.img_file)
+    test_map.load_map_flat_file(args.img_file)
     test_map.threshold_map(args.threshold_type)
     test_map.fill_gaps(1)
 
     test_map.build_graphs()
     test_map.label_map()
     test_map.evaluate_segments()
+    test_map.save()
 
-    visualize = [False, False, False, True, True, True]
+    visualize = [False, False, False, True, True, True, True]
 
     if visualize[0]:
         ################################
@@ -127,5 +128,25 @@ if __name__ == "__main__":
         ax5.imshow(test_map.labeled_map, cmap="nipy_spectral")
 
     ax5.axis('off')
+
+    if visualize[6]:
+        #############################
+        fig6, ax6 = plt.subplots(nrows=1, ncols=1, sharex=True, sharey=True)
+        ax6.imshow(test_map.binary_map, cmap="nipy_spectral")
+        for local_segment, local_segment_type in zip(test_map.segments, test_map.segment_type):
+            if local_segment_type is 'w':
+                ax6.plot(local_segment.minimal_bounding_box[:, 1], local_segment.minimal_bounding_box[:, 0], 'g')
+            if local_segment_type is 'f':
+                ax6.plot(local_segment.minimal_bounding_box[:, 1], local_segment.minimal_bounding_box[:, 0], 'r')
+
+        # quickly find edges
+        LU_adjacency_matrix = np.triu(test_map.adjacency_matrix_segments)
+        edges = np.column_stack(np.nonzero(LU_adjacency_matrix))
+        for edge in edges:
+            x = (test_map.segments[edge[0] - 1].center[1], test_map.segments[edge[1] - 1].center[1])
+            y = (test_map.segments[edge[0] - 1].center[0], test_map.segments[edge[1] - 1].center[0])
+            ax6.plot(x, y, 'b')
+
+    ax6.axis('off')
 
     plt.show()

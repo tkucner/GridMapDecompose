@@ -1,13 +1,11 @@
 # GridMapDecompose
 Simple code used for decomposing occupancy grid map into set of corners and walls. The idea is to utilize the pattern in a structured environment, which is a combination of straight walls and corners. 
 
-The code outputs a labeled map with corresponding minimal bounding boxes for each element in the environment. There are three types of labels:
+The code outputs a labeled map with corresponding minimal bounding boxes for each element in the environment and label them as walls or corners. The code also provides adjacency matrix connecting neighbouring segments of the map.
 
-* wall
-* corner
-* clustered corner
+
  
- ![Example of labeling](https://github.com/tkucner/GridMapDecompose/blob/master/example.png)
+ ![Example of labeling](https://github.com/tkucner/GridMapDecompose/blob/master/result.png)
  
 ## Installation 
 
@@ -18,5 +16,5 @@ pip install -i https://test.pypi.org/simple/GridMapDecompose
 
 An example of usage van be found in map_segmentation_test.py:
 ```bash
-python3 map_segmentation_test.py map.png regular
+python3 map_segmentation_test.py example.pgm regular
 ```
