@@ -1,10 +1,9 @@
+import networkx as nx
 import numpy as np
 from scipy.spatial.distance import correlation
 
 
 # from scipy import ndimage
-
-import networkx as nx
 
 
 def hog_gradient(image):
@@ -132,7 +131,8 @@ class Graph:
         self.WA = nx.Graph()
 
         self.WA.add_edges_from(list_of_coordinates)
-        self.W = list(nx.connected_component_subgraphs(self.WA))
+        # self.W = list(nx.connected_component_subgraphs(self.WA))
+        self.W = list([self.WA.subgraph(c) for c in nx.connected_components(self.WA)])
 
         self.features = np.array(self.adjacency_matrix.copy())
         self.features[self.features < self.similarity_threshold] = np.nan
@@ -140,7 +140,8 @@ class Graph:
         list_of_coordinates = np.array(list(zip(result[0], result[1])))
         self.CA = nx.Graph()
         self.CA.add_edges_from(list_of_coordinates)
-        self.C = list(nx.connected_component_subgraphs(self.CA))
+        # self.C = list(nx.connected_component_subgraphs(self.CA))
+        self.C = list([self.CA.subgraph(c) for c in nx.connected_components(self.CA)])
 
         for sg in self.W:
             if sg.number_of_nodes() == 2:
@@ -160,5 +161,7 @@ class Graph:
             if ca_node in local_wa_nodes:
                 self.WA.remove_node(ca_node)
 
-        self.W = list(nx.connected_component_subgraphs(self.WA))
-        self.C = list(nx.connected_component_subgraphs(self.CA))
+        # self.W = list(nx.connected_component_subgraphs(self.WA))
+        # self.C = list(nx.connected_component_subgraphs(self.CA))
+        self.W = list([self.WA.subgraph(c) for c in nx.connected_components(self.WA)])
+        self.C = list([self.CA.subgraph(c) for c in nx.connected_components(self.CA)])

@@ -1,3 +1,7 @@
+import matplotlib
+
+matplotlib.use('TkAgg')
+import matplotlib.pyplot as plt
 import copy
 
 import numpy as np
@@ -7,9 +11,10 @@ from skimage import io
 from skimage.filters import threshold_yen
 from skimage.morphology import skeletonize
 from skimage.util import img_as_ubyte
-
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 from GridMapDecompose import segment_handling as sgh, graph_handling as gh
-
+import matplotlib as mpl
+from matplotlib import cm
 import pickle
 
 
@@ -21,7 +26,6 @@ def save(graph_map, name):
 
 def load(name):
     return pickle.load(open(name + ".pickle", "rb"))
-
 
 
 class GridMapHandling:
@@ -88,14 +92,14 @@ class GridMapHandling:
 
     def __compute_distances_map(self):
         dimensions = self.binary_map.shape
-        inverted_map = np.ones(dimensions, dtype = int)
+        inverted_map = np.ones(dimensions, dtype=int)
         inverted_map = inverted_map - self.binary_map
         self.__distance_map = ndimage.distance_transform_cdt(inverted_map)
         # return self.__distance_map
 
     def fill_gaps(self, step):
         self.__compute_distances_map()
-        self.processed_map = np.zeros(self.__distance_map.shape, dtype = int)
+        self.processed_map = np.zeros(self.__distance_map.shape, dtype=int)
         self.processed_map[self.__distance_map <= step] = int(1)
         return self.processed_map
 
@@ -134,8 +138,9 @@ class GridMapHandling:
 
         for sg in self.graph.W:
             self.segment_type.append('w')
-            it = it +1
-            for node_id in sg.node:
+            it = it + 1
+            # for node_id in sg.node:
+            for node_id in sg:
                 a = self.graph.nodes[node_id]
 
                 ac = a['coordinates']
@@ -146,7 +151,8 @@ class GridMapHandling:
         for sg in self.graph.C:
             self.segment_type.append('f')
             it = it + 1
-            for node_id in sg.node:
+            # for node_id in sg.node:
+            for node_id in sg:
                 a = self.graph.nodes[node_id]
                 ac = a['coordinates']
                 self.labeled_map[ac[0], ac[1]] = it
@@ -171,6 +177,135 @@ class GridMapHandling:
                 for neighbour in neighbours:
                     self.adjacency_matrix_segments[self.labeled_map[coord[0], coord[1]], neighbour] = 1
                     self.adjacency_matrix_segments[neighbour, self.labeled_map[coord[0], coord[1]]] = 1
+
+    def show(self, visualize):
+        if visualize["adjacency matrix"]:
+            ################################
+            fig, ax = plt.subplots(nrows=1, ncols=1, sharex=True, sharey=True)
+            im2 = ax.imshow(self.graph.adjacency_matrix)
+            divider = make_axes_locatable(ax)
+            cax = divider.append_axes("right", size="5%", pad=0.05)
+            plt.colorbar(im2, cax=cax)
+            plt.show()
+
+        if visualize["nodes"]:
+            ################################
+            fig, ax = plt.subplots(nrows=1, ncols=1, sharex=True, sharey=True)
+            min_score = np.nanmin(self.graph.adjacency_matrix)
+            max_score = np.nanmax(self.graph.adjacency_matrix)
+            norm = plt.Normalize(min_score, max_score)
+            cmap = mpl.cm.ScalarMappable(norm=norm, cmap=mpl.cm.jet)
+            cmap.set_array([])
+            ax.imshow(self.skeleton, cmap="nipy_spectral")
+            for it in range(0, self.graph.adjacency_matrix.shape[0]):
+                if not self.graph.node_labels[it]:
+                    ax.plot(self.graph.nodes[it]['coordinates'][1], self.graph.nodes[it]['coordinates'][0],
+                            'g+')
+                else:
+                    ax.plot(self.graph.nodes[it]['coordinates'][1], self.graph.nodes[it]['coordinates'][0],
+                            'r.')
+            for it in range(0, self.graph.adjacency_matrix.shape[0]):
+                for jt in range(it, self.graph.adjacency_matrix.shape[0]):
+                    if not np.isnan(self.graph.adjacency_matrix[it, jt]):
+                        a = self.graph.nodes[it]
+                        b = self.graph.nodes[jt]
+                        a = a['coordinates']
+                        b = b['coordinates']
+                        y = [a[0], b[0]]
+                        x = [a[1], b[1]]
+                        im = ax.plot(x, y, color=cm.jet(norm(self.graph.adjacency_matrix[it, jt])))
+            fig.subplots_adjust(right=0.8)
+            cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
+            fig.colorbar(cmap, cax=cbar_ax)
+            ax.axis('off')
+            fig.tight_layout()
+            plt.show()
+
+        if visualize["edges"]:
+            #############################
+            fig, ax = plt.subplots(nrows=1, ncols=1, sharex=True, sharey=True)
+            min_score = np.nanmin(self.graph.walls)
+            max_score = np.nanmax(self.graph.walls)
+            norm = plt.Normalize(min_score, max_score)
+            cmap = mpl.cm.ScalarMappable(norm=norm, cmap=mpl.cm.jet)
+            cmap.set_array([])
+            ax.imshow(self.skeleton, cmap="nipy_spectral")
+            for it in range(0, self.graph.walls.shape[0]):
+                for jt in range(it, self.graph.walls.shape[0]):
+                    if not self.graph.walls[it, jt] == 0.0:
+                        a = self.graph.nodes[it]
+                        b = self.graph.nodes[jt]
+                        a = a['coordinates']
+                        b = b['coordinates']
+                        y = [a[0], b[0]]
+                        x = [a[1], b[1]]
+                        im = ax.plot(x, y, color=cm.jet(norm(self.graph.walls[it, jt])))
+            fig.subplots_adjust(right=0.8)
+            cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
+            fig.colorbar(cmap, cax=cbar_ax)
+            fig.tight_layout()
+            ax.axis('off')
+            plt.show()
+
+        if visualize["corners and walls"]:
+            #############################
+            fig, ax = plt.subplots(nrows=1, ncols=1, sharex=True, sharey=True)
+            ax.imshow(self.skeleton, cmap="nipy_spectral")
+            for sg in self.graph.C:
+                coord = []
+                for node_id in sg.node:
+                    a = self.graph.nodes[node_id]
+                    coord.append(a['coordinates'])
+                coord = np.array(coord)
+                ax.plot(coord[:, 1], coord[:, 0], 's', markerfacecolor='none')
+            for sg in self.graph.W:
+                coord = []
+                for node_id in sg.node:
+                    a = self.graph.nodes[node_id]
+                    coord.append(a['coordinates'])
+                coord = np.array(coord)
+                ax.plot(coord[:, 1], coord[:, 0], '.')
+            fig.tight_layout()
+            ax.axis('off')
+            plt.show()
+
+        if visualize["corners and walls mbb"]:
+            #############################
+            fig, ax = plt.subplots(nrows=1, ncols=1, sharex=True, sharey=True)
+            ax.imshow(self.binary_map, cmap="nipy_spectral")
+            for local_segment, local_segment_type in zip(self.segments, self.segment_type):
+                if local_segment_type is 'w':
+                    ax.plot(local_segment.minimal_bounding_box[:, 1], local_segment.minimal_bounding_box[:, 0], 'g')
+                if local_segment_type is 'f':
+                    ax.plot(local_segment.minimal_bounding_box[:, 1], local_segment.minimal_bounding_box[:, 0], 'r')
+            ax.axis('off')
+            plt.show()
+
+        if visualize["labeled map"]:
+            #############################
+            fig, ax = plt.subplots(nrows=1, ncols=1, sharex=True, sharey=True)
+            ax.imshow(self.labeled_map, cmap="nipy_spectral")
+            ax.axis('off')
+            plt.show()
+
+        if visualize["graph and mbb"]:
+            #############################
+            fig, ax = plt.subplots(nrows=1, ncols=1, sharex=True, sharey=True)
+            ax.imshow(self.binary_map, cmap="nipy_spectral")
+            for local_segment, local_segment_type in zip(self.segments, self.segment_type):
+                if local_segment_type is 'w':
+                    ax.plot(local_segment.minimal_bounding_box[:, 1], local_segment.minimal_bounding_box[:, 0], 'g')
+                if local_segment_type is 'f':
+                    ax.plot(local_segment.minimal_bounding_box[:, 1], local_segment.minimal_bounding_box[:, 0], 'r')
+            # quickly find edges
+            LU_adjacency_matrix = np.triu(self.adjacency_matrix_segments)
+            edges = np.column_stack(np.nonzero(LU_adjacency_matrix))
+            for edge in edges:
+                x = (self.segments[edge[0] - 1].center[1], self.segments[edge[1] - 1].center[1])
+                y = (self.segments[edge[0] - 1].center[0], self.segments[edge[1] - 1].center[0])
+                ax.plot(x, y, 'b')
+            ax.axis('off')
+            plt.show()
 
     @staticmethod
     def skeletonize(map_slice):
